@@ -25,8 +25,11 @@ def download():
     result = subprocess.run(cmd_title, capture_output=True, text=True, shell=True)
     video_title = result.stdout.strip()
 
+    # Get the absolute path of the "downloads" folder on the server
+    downloads_folder = os.path.abspath('downloads')
+
     # Construct the full file path on the server
-    file_path = f'downloads/{video_title}.{extension}'
+    file_path = os.path.join(downloads_folder, f'{video_title}.{extension}')
 
     # Construct the command to download the video
     cmd = f'yt-dlp {format_option} --output "{file_path}" {url}'
