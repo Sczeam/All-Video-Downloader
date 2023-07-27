@@ -1,5 +1,6 @@
+import os
+from flask import Flask, render_template, request, send_file
 import subprocess
-from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
 
@@ -19,10 +20,25 @@ def download():
         format_option = '--format bestaudio/best'
         extension = 'mp3'
 
-    cmd = f'yt-dlp {format_option} --output "downloads/%(title)s.{extension}" {url}'
+    # Use yt-dlp to fetch video title
+    cmd_title = f'yt-dlp --get-title --no-warnings {url}'
+    result = subprocess.run(cmd_title, capture_output=True, text=True, shell=True)
+    video_title = result.stdout.strip()
+
+    # Construct the full file path on the server
+    file_path = f'downloads/{video_title}.{extension}'
+
+    # Construct the command to download the video
+    cmd = f'yt-dlp {format_option} --output "{file_path}" {url}'
     subprocess.run(cmd, shell=True)
 
-    return redirect(url_for('index'))
+    # Check if the file exists on the server
+    if os.path.exists(file_path):
+        # Send the file to the client for download
+        return send_file(file_path, as_attachment=True)
+
+    # If the file doesn't exist, you can handle the error here, e.g., show an error page.
+    return "File not found.", 404
 
 # Route for Terms and Conditions page
 @app.route('/termandcondition')
