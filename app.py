@@ -19,15 +19,15 @@ def download():
     else:
         format_option = '--format bestaudio/best'
         extension = 'mp3'
-
+    print("Command:", cmd)
     # Use yt-dlp to fetch video title
     cmd_title = f'yt-dlp --get-title --no-warnings {url}'
     result = subprocess.run(cmd_title, capture_output=True, text=True, shell=True)
     video_title = result.stdout.strip()
-
+    
+    print("yt-dlp Output:", result.stdout)
     # Get the absolute path of the "downloads" folder on the server
-    downloads_folder = '~/workspace/downloads'
-
+    downloads_folder = os.path.abspath('downloads')
 
     # Construct the full file path on the server
     file_path = os.path.join(downloads_folder, f'{video_title}.{extension}')
@@ -39,9 +39,11 @@ def download():
     # Check if the file exists on the server
     if os.path.exists(file_path):
         # Send the file to the client for download
+        print("Sending file:", file_path)
         return send_file(file_path, as_attachment=True)
 
     # If the file doesn't exist, you can handle the error here, e.g., show an error page.
+    print("File not found:", file_path)
     return "File not found.", 404
 
 # Route for Terms and Conditions page
@@ -55,4 +57,4 @@ def about_us():
     return render_template('aboutus.html')
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=True)
