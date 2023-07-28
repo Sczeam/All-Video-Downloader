@@ -32,7 +32,7 @@ def download():
 
     print("yt-dlp Output:", result.stdout)
     # Get the absolute path of the "downloads" folder on the server
-    downloads_folder = os.path.abspath('downloads')
+    downloads_folder = '/downloads'
 
     # Construct the full file path on the server
     file_path = os.path.join(downloads_folder, f'{video_title}.{extension}')
