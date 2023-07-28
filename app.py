@@ -19,12 +19,12 @@ def download():
     else:
         format_option = '--format bestaudio/best'
         extension = 'mp3'
-    print("Command:", cmd)
+    
     # Use yt-dlp to fetch video title
     cmd_title = f'yt-dlp --get-title --no-warnings {url}'
     result = subprocess.run(cmd_title, capture_output=True, text=True, shell=True)
     video_title = result.stdout.strip()
-    
+
     print("yt-dlp Output:", result.stdout)
     # Get the absolute path of the "downloads" folder on the server
     downloads_folder = os.path.abspath('downloads')
@@ -34,6 +34,7 @@ def download():
 
     # Construct the command to download the video
     cmd = f'yt-dlp {format_option} --output "{file_path}" {url}'
+    print("Command:", cmd)
     subprocess.run(cmd, shell=True)
 
     # Check if the file exists on the server
