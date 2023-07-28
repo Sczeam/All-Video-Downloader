@@ -26,7 +26,7 @@ def download():
     video_title = result.stdout.strip()
 
     # Get the absolute path of the "downloads" folder on the server
-    downloads_folder = '/workspace/downloads'
+    downloads_folder = '~/workspace/downloads'
 
 
     # Construct the full file path on the server
