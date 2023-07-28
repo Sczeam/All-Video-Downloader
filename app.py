@@ -25,6 +25,11 @@ def download():
     result = subprocess.run(cmd_title, capture_output=True, text=True, shell=True)
     video_title = result.stdout.strip()
 
+    # Truncate video title if it exceeds the maximum filename length (e.g., 255 characters for FAT32)
+    max_filename_length = 255
+    if len(video_title) > max_filename_length:
+        video_title = video_title[:max_filename_length]
+
     print("yt-dlp Output:", result.stdout)
     # Get the absolute path of the "downloads" folder on the server
     downloads_folder = os.path.abspath('downloads')
