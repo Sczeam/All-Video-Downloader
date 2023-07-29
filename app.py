@@ -15,16 +15,26 @@ def download():
 
     # Validate the user input and handle errors here if necessary
 
-    # Download the video using yt-dlp
+    # Download the video/audio using yt-dlp
     temp_dir = 'temp_downloads'  # Create a temporary directory to store the downloaded file
     os.makedirs(temp_dir, exist_ok=True)
 
-    ydl_opts = {
-        'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',  # Use the best quality available
-        'outtmpl': os.path.join(temp_dir, 'video.mp4'),  # Set the output filename directly
-        'progress_hooks': [],  # Avoid printing progress to the console
-        'playlist_items': '1',
-    }
+    if format_choice == 'mp3':
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            # 'ext':'m4a',
+            'outtmpl': os.path.join(temp_dir, 'audio.mp3'),
+            'progress_hooks': [],
+            'playlist_items': '1',
+        }
+    else:
+        ydl_opts = {
+            'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best',
+            # 'ext':'mp4',
+            'outtmpl': os.path.join(temp_dir, 'video.%(ext)s'),
+            'progress_hooks': [],
+            'playlist_items': '1',
+        }
 
     import yt_dlp
     current_directory = os.getcwd()  # Get the current working directory
@@ -36,16 +46,20 @@ def download():
 
     # Move the downloaded file to the client's downloads folder
     downloads_folder = os.path.expanduser('~')  # Get the absolute path to the Downloads folder
-    shutil.move(os.path.join(temp_dir, 'video.mp4'), os.path.join(downloads_folder, 'video.mp4'))
+    if format_choice == 'mp3':
+        filename = 'audio.mp3'
+    else:
+        filename = 'video.mp4'
+    shutil.move(os.path.join(temp_dir, filename), os.path.join(downloads_folder, filename))
 
     # Clean up temporary files
-    os.rmdir(temp_dir)
+    shutil.rmtree(temp_dir)
 
     # Return the file for download to the client
     return send_file(
-        os.path.join(downloads_folder, 'video.mp4'),
+        os.path.join(downloads_folder, filename),
         as_attachment=True,
-        download_name='video.mp4'
+        download_name=filename
     )
 
 @app.route('/termandcondition')
