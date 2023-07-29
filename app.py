@@ -35,6 +35,7 @@ def download():
     # Download video using yt-dlp
     ydl_opts = {
         'format': format_option,
+         'playlist-items': '1',
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
