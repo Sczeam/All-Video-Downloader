@@ -1,8 +1,6 @@
 import os
+import shutil
 from flask import Flask, render_template, request, send_file
-import yt_dlp
-import subprocess
-from io import BytesIO
 
 app = Flask(__name__)
 
@@ -13,47 +11,42 @@ def index():
 @app.route('/download', methods=['POST'])
 def download():
     url = request.form['url']
-    download_format = request.form['format']
+    format_choice = request.form['format']
 
-    if download_format == 'mp4':
-        format_option = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best'
-        extension = 'mp4'
-    else:
-        format_option = 'bestaudio/best'
-        extension = 'mp3'
-    
-    # Use yt-dlp to fetch video title
-    cmd_title = f'yt-dlp --get-title --no-warnings {url}'
-    result = subprocess.run(cmd_title, capture_output=True, text=True, shell=True)
-    video_title = result.stdout.strip()
+    # Validate the user input and handle errors here if necessary
 
-    # Truncate video title if it exceeds the maximum filename length (e.g., 255 characters for FAT32)
-    max_filename_length = 255
-    if len(video_title) > max_filename_length:
-        video_title = video_title[:max_filename_length]
+    # Download the video using yt-dlp
+    temp_dir = 'temp_downloads'  # Create a temporary directory to store the downloaded file
+    os.makedirs(temp_dir, exist_ok=True)
 
-    # Download video using yt-dlp
     ydl_opts = {
-        'format': format_option,
-         'playlist_items': '1',
+        'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',  # Use the best quality available
+        'outtmpl': os.path.join(temp_dir, 'video.mp4'),  # Set the output filename directly
+        'progress_hooks': [],  # Avoid printing progress to the console
+        'playlist_items': '1',
     }
 
+    import yt_dlp
+    current_directory = os.getcwd()  # Get the current working directory
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info_dict = ydl.extract_info(url, download=False)
-        video_bytes = BytesIO(ydl.download([url]))
+        ydl.download([url])
 
-    # Send the file to the client for download
-    return send_file(video_bytes, as_attachment=True, attachment_filename=f'{video_title}.{extension}')
+    # Change the working directory back to the original directory
+    os.chdir(current_directory)
 
-# Route for Terms and Conditions page
-@app.route('/termandcondition')
-def terms_and_conditions():
-    return render_template('termandcondition.html')
+    # Move the downloaded file to the client's downloads folder
+    downloads_folder = os.path.expanduser('~')  # Get the absolute path to the Downloads folder
+    shutil.move(os.path.join(temp_dir, 'video.mp4'), os.path.join(downloads_folder, 'video.mp4'))
 
-# Route for About Us page
-@app.route('/aboutus')
-def about_us():
-    return render_template('aboutus.html')
+    # Clean up temporary files
+    os.rmdir(temp_dir)
+
+    # Return the file for download to the client
+    return send_file(
+        os.path.join(downloads_folder, 'video.mp4'),
+        as_attachment=True,
+        download_name='video.mp4'
+    )
 
 if __name__ == '__main__':
     app.run(debug=True)
