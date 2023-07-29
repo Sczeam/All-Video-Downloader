@@ -22,15 +22,15 @@ def download():
 
     if format_choice == 'mp3':
         ydl_opts = {
-            'format': 'bestaudio/best',
+            'format': 'bestaudio[ext=m4a]/best',
             'outtmpl': os.path.join(temp_dir, 'audio.%(ext)s'),
             'progress_hooks': [],
             'playlist_items': '1',
-            'ext': 'mp3',  # Explicitly specify the extension for MP3 downloads
+            # 'ext': 'mp3',  # Explicitly specify the extension for MP3 downloads
         }
     else:
         ydl_opts = {
-            'format': 'bestvideo+bestaudio/best',
+            'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best',
             'outtmpl': os.path.join(temp_dir, 'video.%(ext)s'),
             'progress_hooks': [],
             'playlist_items': '1',
