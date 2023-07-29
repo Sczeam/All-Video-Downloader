@@ -2,6 +2,8 @@ import os
 from flask import Flask, render_template, request, send_file
 import yt_dlp
 import subprocess
+from io import BytesIO
+
 app = Flask(__name__)
 
 @app.route('/')
@@ -14,10 +16,10 @@ def download():
     download_format = request.form['format']
 
     if download_format == 'mp4':
-        format_option = '--format bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best'
+        format_option = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best'
         extension = 'mp4'
     else:
-        format_option = '--format bestaudio/best'
+        format_option = 'bestaudio/best'
         extension = 'mp3'
     
     # Use yt-dlp to fetch video title
@@ -30,42 +32,17 @@ def download():
     if len(video_title) > max_filename_length:
         video_title = video_title[:max_filename_length]
 
-    print("yt-dlp Output:", result.stdout)
-    # Get the absolute path of the "downloads" folder on the server
-    downloads_folder = './downloads'
-
-    # Construct the full file path on the server
-    file_path = os.path.join(downloads_folder, f'{video_title}.{extension}')
-
-    # Construct the command to download the video
-    # cmd = f'yt-dlp {format_option} --output "{file_path}" {url}'
-    # print("Command:", cmd)
-    # subprocess.run(cmd, shell=True)
-    video_url = request.form['video_url']
-
     # Download video using yt-dlp
     ydl_opts = {
-    'outtmpl': 'downloads/%(title)s.%(ext)s',
-    
-    'playlist_items': '1',
-}
-
+        'format': format_option,
+    }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info_dict = ydl.extract_info(video_url, download=True)
+        info_dict = ydl.extract_info(url, download=False)
+        video_bytes = BytesIO(ydl.download([url]))
 
-    return redirect('/')
-
-    # Check if the file exists on the server
-    if os.path.exists(file_path):
-        # Send the file to the client for download
-
-        print("Sending file:", file_path)
-        return send_file(file_path, as_attachment=True)
-
-    # If the file doesn't exist, you can handle the error here, e.g., show an error page.
-    print("File not found:", file_path)
-    return "File not found.", 404
+    # Send the file to the client for download
+    return send_file(video_bytes, as_attachment=True, attachment_filename=f'{video_title}.{extension}')
 
 # Route for Terms and Conditions page
 @app.route('/termandcondition')
