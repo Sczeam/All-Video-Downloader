@@ -23,7 +23,7 @@ def download():
     if format_choice == 'mp3':
         ydl_opts = {
             'format': 'bestaudio[ext=m4a]/best',
-            'outtmpl': os.path.join(temp_dir, 'audio.%(ext)s'),
+            'outtmpl': os.path.join(temp_dir, 'audio.mp3'),
             'progress_hooks': [],
             'playlist_items': '1',
             # 'ext': 'mp3',  # Explicitly specify the extension for MP3 downloads
