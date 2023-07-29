@@ -1,6 +1,7 @@
 import os
 import shutil
 from flask import Flask, render_template, request, send_file
+from yt_dlp.utils import DownloadError
 
 app = Flask(__name__)
 
@@ -22,15 +23,14 @@ def download():
     if format_choice == 'mp3':
         ydl_opts = {
             'format': 'bestaudio/best',
-            # 'ext':'m4a',
-            'outtmpl': os.path.join(temp_dir, 'audio.mp3'),
+            'outtmpl': os.path.join(temp_dir, 'audio.%(ext)s'),
             'progress_hooks': [],
             'playlist_items': '1',
+            'ext': 'mp3',  # Explicitly specify the extension for MP3 downloads
         }
     else:
         ydl_opts = {
-            'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best',
-            # 'ext':'mp4',
+            'format': 'bestvideo+bestaudio/best',
             'outtmpl': os.path.join(temp_dir, 'video.%(ext)s'),
             'progress_hooks': [],
             'playlist_items': '1',
@@ -38,8 +38,13 @@ def download():
 
     import yt_dlp
     current_directory = os.getcwd()  # Get the current working directory
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([url])
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
+    except DownloadError as e:
+        # Handle the error gracefully
+        error_message = "The video cannot be downloaded from Instagram currently. Please try again later or download from another URL."
+        return render_template('error.html', error_message=error_message)
 
     # Change the working directory back to the original directory
     os.chdir(current_directory)
