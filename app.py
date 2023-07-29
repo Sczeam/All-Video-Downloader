@@ -58,7 +58,7 @@ def download():
     shutil.move(os.path.join(temp_dir, filename), os.path.join(downloads_folder, filename))
 
     # Clean up temporary files
-    shutil.rmtree(temp_dir)
+    # shutil.rmtree(temp_dir)
 
     # Return the file for download to the client
     return send_file(
