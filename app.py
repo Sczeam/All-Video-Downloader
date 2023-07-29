@@ -48,5 +48,13 @@ def download():
         download_name='video.mp4'
     )
 
+@app.route('/termandcondition')
+def termandcondition():
+    return render_template('termandcondition.html')
+
+@app.route('/aboutus')
+def aboutus():
+    return render_template('aboutus.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
