@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.png', _v='1.0') }}">
-
     <style>
         .btn{
             background-color: #62C370;
@@ -21,26 +20,29 @@
     {% include 'navbar.html' %}
 
     <!-- navi end -->
-
     <div class="container-fluid">
         <h1 class="text-center mt-3">All Video Downloader</h1>
         <p class="text-center mt-3">you can download every video from YouTube, Facebook, Instagram and TikTok for free</p>
     </div>
     <div class="container-fluid">
-        <form method="POST" action="{{ url_for('download') }}">
+        <form action="/download" method="post">
             <div class="row justify-content-center">
                 <div class="col-md-6 col-lg-4 text-center">
-                    <input type="text" class="form-control" name="url" id="url" placeholder="Paste URL here" required>
-                    <br>
-                    <input type="radio" name="format" value="mp4" checked> MP4
-                    <input type="radio" name="format" value="mp3"> MP3
-                    <br>
+                    <input type="text" class="form-control" id="url" name="url" placeholder="Paste URL here" required><br>
+    
+                    <label for="format">Choose Format:</label>
+                    <select id="format" name="format">
+                        <option value="mp4">MP4</option>
+                        <option value="mp3">MP3</option>
+                    </select><br>
+    
                     <input class="btn btn-success mt-3" type="submit" value="Download">
                 </div>
             </div>
+            
         </form>
     </div>
-
+    
     <script src="{{ url_for('static', filename='bootstrap.bundle.min.js') }}"></script>
 </body>
 </html>
