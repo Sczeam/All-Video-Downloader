@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.png', _v='1.0') }}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <style>
         .btn{
             background-color: #62C370;
@@ -25,24 +26,50 @@
         <p class="text-center mt-3">you can download every video from YouTube, Facebook, Instagram and TikTok for free</p>
     </div>
     <div class="container-fluid">
-        <form action="/download" method="post">
+        <form action="/download" method="post" onsubmit="showLoadingMessage()">
             <div class="row justify-content-center">
                 <div class="col-md-6 col-lg-4 text-center">
                     <input type="text" class="form-control" id="url" name="url" placeholder="Paste URL here" required><br>
-    
+                    
                     <label for="format">Choose Format:</label>
                     <select id="format" name="format">
                         <option value="mp4">MP4</option>
                         <option value="mp3">MP3</option>
                     </select><br>
-    
-                    <input class="btn btn-success mt-3" type="submit" value="Download">
+                    
+                    <input class="btn btn-success mt-3" type="submit" value="Download" onclick="startDownload()">
+                    
                 </div>
             </div>
-            
+            <input type="hidden" id="downloadCompleted" name="downloadCompleted" value="false">
         </form>
+        <div id="loadingMessage" style="display: none;">Preparing your download...</div>
     </div>
     
+    
     <script src="{{ url_for('static', filename='bootstrap.bundle.min.js') }}"></script>
+
+    <script>
+        function showLoadingMessage() {
+            $("#loadingMessage").show();
+        }
+    
+        function startDownload() {
+            // Set the downloadCompleted cookie when the download starts
+            document.cookie = 'downloadCompleted=true';
+        }
+    
+        $(document).ready(function() {
+            // Check if the downloadCompleted cookie is set to true
+            if (document.cookie.indexOf('downloadCompleted=true') !== -1) {
+                $("#loadingMessage").text("Download complete! Redirecting..."); // Optional: Update the loading message
+                setTimeout(function () {
+                    $("#loadingMessage").hide();
+                    // Clear the downloadCompleted cookie after hiding the message
+                    document.cookie = "downloadCompleted=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                }, 3000); // Optional: Hide the message after 3 seconds (adjust as needed)
+            }
+        });
+    </script>
 </body>
 </html>

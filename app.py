@@ -1,6 +1,7 @@
 import os
 import shutil
-from flask import Flask, render_template, request, send_file
+import yt_dlp
+from flask import Flask, render_template, request, send_file, make_response, jsonify
 from yt_dlp.utils import DownloadError
 
 app = Flask(__name__)
@@ -22,6 +23,7 @@ def download():
 
     if format_choice == 'mp3':
         ydl_opts = {
+            "quiet": True,
             'format': 'bestaudio[ext=m4a]/best',
             'outtmpl': os.path.join(temp_dir, 'audio.mp3'),
             'progress_hooks': [],
@@ -30,13 +32,16 @@ def download():
         }
     else:
         ydl_opts = {
-            'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best',
+            "quiet": True,
+            'format': 'bestvideo+bestaudio/best',
+            "merge_output_format": "mp4",
+            # 'writethumbnail':True,
             'outtmpl': os.path.join(temp_dir, 'video.%(ext)s'),
             'progress_hooks': [],
             'playlist_items': '1',
         }
 
-    import yt_dlp
+    
     current_directory = os.getcwd()  # Get the current working directory
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -61,11 +66,25 @@ def download():
     # shutil.rmtree(temp_dir)
 
     # Return the file for download to the client
-    return send_file(
+    response = make_response(send_file(
         os.path.join(downloads_folder, filename),
         as_attachment=True,
-        download_name=filename
-    )
+        download_name=filename,
+    ))
+    response.set_cookie('downloadCompleted', 'true')
+
+    return response
+def mark_download_completed(response):
+    response.headers['Content-Disposition'] = 'attachment; filename=' + filename
+    # Set the downloadCompleted flag to true (using a hidden input field)
+    response.set_cookie('downloadCompleted', 'true')
+    return response
+
+@app.route('/check_download_completion')
+def check_download_completion():
+    # Check if the downloadCompleted cookie is set to true
+    download_completed = request.cookies.get('downloadCompleted', False)
+    return jsonify(download_completed)
 
 @app.route('/termandcondition')
 def termandcondition():
