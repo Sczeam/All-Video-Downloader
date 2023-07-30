@@ -5,44 +5,90 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.png', _v='1.0') }}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <style>
-        .btn{
+        .btn {
             background-color: #62C370;
             border: none;
             color: white;
         }
-        
-        
     </style>
 </head>
 <body>
     <!-- navi start -->
     {% include 'navbar.html' %}
-
     <!-- navi end -->
+
     <div class="container-fluid">
         <h1 class="text-center mt-3">All Video Downloader</h1>
         <p class="text-center mt-3">you can download every video from YouTube, Facebook, Instagram and TikTok for free</p>
     </div>
+
     <div class="container-fluid">
-        <form action="/download" method="post">
+        <form id="downloadForm" action="/download" method="post">
             <div class="row justify-content-center">
                 <div class="col-md-6 col-lg-4 text-center">
                     <input type="text" class="form-control" id="url" name="url" placeholder="Paste URL here" required><br>
-    
+
                     <label for="format">Choose Format:</label>
                     <select id="format" name="format">
                         <option value="mp4">MP4</option>
                         <option value="mp3">MP3</option>
                     </select><br>
-    
+
                     <input class="btn btn-success mt-3" type="submit" value="Download">
+
                 </div>
             </div>
-            
         </form>
     </div>
+
+    <div id="loadingMessage" style="display: none;" class="container-fluid text-center mt-3">Downloading...</div>
+    <div id="downloadCompleteMessage" style="display: none;" class="container-fluid text-center mt-3">Download complete!</div>
+
+    <script>
+        $(document).ready(function() {
+            // Attach event handler to the form submit event
+            $("#downloadForm").submit(function() {
+                $("#loadingMessage").text("Downloading..."); // Update the message to "Downloading..."
+                $("#loadingMessage").show(); // Show the "Downloading..." message
     
-    <script src="{{ url_for('static', filename='bootstrap.bundle.min.js') }}"></script>
+                // Hide the "Download complete!" message if it's currently shown
+                $("#downloadCompleteMessage").hide();
+            });
+    
+            // Function to check the presence of the 'downloadCompleted' cookie
+            function checkDownloadCompletedCookie() {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    if (cookie.indexOf('downloadCompleted=true') === 0) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+    
+            // Function to show/hide the "Download complete!" message based on the cookie
+            function showDownloadCompleteMessage() {
+                if (checkDownloadCompletedCookie()) {
+                    $("#loadingMessage").hide(); // Hide the "Downloading..." message
+                    $("#downloadCompleteMessage").show(); // Show the "Download complete!" message
+                    
+                    // Clear the downloadCompleted cookie after 5 seconds
+                    setTimeout(function() {
+                        document.cookie = "downloadCompleted=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                        $("#downloadCompleteMessage").hide();
+                    }, 5000);
+                }
+            }
+    
+            // Call the function to hide the "Download complete!" message on page load
+            $("#downloadCompleteMessage").hide();
+    
+            // Call the function on every 1 second to check and show the "Download complete!" message
+            setInterval(showDownloadCompleteMessage, 1000);
+        });
+    </script>
 </body>
 </html>

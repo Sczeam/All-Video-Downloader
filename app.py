@@ -1,7 +1,7 @@
 import os
 import shutil
-from flask import Flask, render_template, request, send_file
-from yt_dlp.utils import DownloadError
+import yt_dlp
+from flask import Flask, render_template, request, send_file, make_response
 
 app = Flask(__name__)
 
@@ -14,34 +14,33 @@ def download():
     url = request.form['url']
     format_choice = request.form['format']
 
-    # Validate the user input and handle errors here if necessary
-
     # Download the video/audio using yt-dlp
     temp_dir = 'temp_downloads'  # Create a temporary directory to store the downloaded file
     os.makedirs(temp_dir, exist_ok=True)
 
     if format_choice == 'mp3':
         ydl_opts = {
+            "quiet": True,
             'format': 'bestaudio[ext=m4a]/best',
             'outtmpl': os.path.join(temp_dir, 'audio.mp3'),
             'progress_hooks': [],
             'playlist_items': '1',
-            # 'ext': 'mp3',  # Explicitly specify the extension for MP3 downloads
         }
     else:
         ydl_opts = {
-            'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best',
+            "quiet": True,
+            'format': 'bestvideo+bestaudio[ext=m4a]/best',
+            "merge_output_format": "mp4",
             'outtmpl': os.path.join(temp_dir, 'video.%(ext)s'),
             'progress_hooks': [],
             'playlist_items': '1',
         }
 
-    import yt_dlp
     current_directory = os.getcwd()  # Get the current working directory
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
-    except DownloadError as e:
+    except yt_dlp.utils.DownloadError as e:
         # Handle the error gracefully
         error_message = "The video cannot be downloaded from Instagram currently. Please try again later or download from another URL."
         return render_template('error.html', error_message=error_message)
@@ -61,11 +60,14 @@ def download():
     # shutil.rmtree(temp_dir)
 
     # Return the file for download to the client
-    return send_file(
+    response = make_response(send_file(
         os.path.join(downloads_folder, filename),
         as_attachment=True,
-        download_name=filename
-    )
+        download_name=filename,
+    ))
+    response.set_cookie('downloadCompleted', 'true')  # Set the downloadCompleted cookie
+
+    return response
 
 @app.route('/termandcondition')
 def termandcondition():
