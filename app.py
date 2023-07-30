@@ -20,7 +20,7 @@ def download():
 
     if format_choice == 'mp3':
         ydl_opts = {
-            "quiet": True,
+            # "quiet": True,
             'format': 'bestaudio[ext=m4a]/best',
             'outtmpl': os.path.join(temp_dir, 'audio.mp3'),
             'progress_hooks': [],
@@ -28,8 +28,8 @@ def download():
         }
     else:
         ydl_opts = {
-            "quiet": True,
-            'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best',
+            # "quiet": True,
+            'format': 'bestvideo+bestaudio[ext=m4a]/best',
             "merge_output_format": "mp4",
             'outtmpl': os.path.join(temp_dir, 'video.%(ext)s'),
             'progress_hooks': [],
