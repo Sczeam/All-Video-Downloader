@@ -29,7 +29,7 @@ def download():
     else:
         ydl_opts = {
             # "quiet": True,
-            'format': 'bestvideo+bestaudio[ext=m4a]/best',
+            'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best',
             "merge_output_format": "mp4",
             'outtmpl': os.path.join(temp_dir, 'video.%(ext)s'),
             'progress_hooks': [],
