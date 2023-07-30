@@ -43,8 +43,8 @@
         </form>
     </div>
 
-    <div id="loadingMessage" style="display: none;" class="text-center">Downloading...</div>
-    <div id="downloadCompleteMessage" style="display: none;" class="text-center">Download complete!</div>
+    <div id="loadingMessage" style="display: none;" class="container-fluid text-center mt-3">Downloading...</div>
+    <div id="downloadCompleteMessage" style="display: none;" class="container-fluid text-center mt-3">Download complete!</div>
 
     <script>
         $(document).ready(function() {
@@ -52,11 +52,11 @@
             $("#downloadForm").submit(function() {
                 $("#loadingMessage").text("Downloading..."); // Update the message to "Downloading..."
                 $("#loadingMessage").show(); // Show the "Downloading..." message
-
+    
                 // Hide the "Download complete!" message if it's currently shown
                 $("#downloadCompleteMessage").hide();
             });
-
+    
             // Function to check the presence of the 'downloadCompleted' cookie
             function checkDownloadCompletedCookie() {
                 var cookies = document.cookie.split(';');
@@ -68,11 +68,13 @@
                 }
                 return false;
             }
-
+    
             // Function to show/hide the "Download complete!" message based on the cookie
             function showDownloadCompleteMessage() {
                 if (checkDownloadCompletedCookie()) {
-                    $("#downloadCompleteMessage").show();
+                    $("#loadingMessage").hide(); // Hide the "Downloading..." message
+                    $("#downloadCompleteMessage").show(); // Show the "Download complete!" message
+                    
                     // Clear the downloadCompleted cookie after 5 seconds
                     setTimeout(function() {
                         document.cookie = "downloadCompleted=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
@@ -80,10 +82,10 @@
                     }, 5000);
                 }
             }
-
+    
             // Call the function to hide the "Download complete!" message on page load
             $("#downloadCompleteMessage").hide();
-            
+    
             // Call the function on every 1 second to check and show the "Download complete!" message
             setInterval(showDownloadCompleteMessage, 1000);
         });
